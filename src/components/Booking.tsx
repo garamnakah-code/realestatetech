@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Calendar, Clock, MapPin, ArrowRight, Check } from 'lucide-react';
 import { submitInspectionRequest } from '@/lib/supabase';
 
-const CALENDLY_URL = 'https://calendly.com/your-handle/obsidian-inspection';
+const CALENDLY_URL = 'https://calendly.com/garamnakah/30min';
 
 export default function Booking() {
   const [form, setForm] = useState({ name: '', email: '', phone: '', preferred_date: '', notes: '' });
