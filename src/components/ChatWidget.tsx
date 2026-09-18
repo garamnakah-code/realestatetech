@@ -7,15 +7,27 @@ const SUGGESTIONS = [
   'What are the payment schedules?',
   'Book a site inspection',
   'Tell me about pricing',
-];
+] as const;
 
-const CALENDLY_URL = 'https://calendly.com/your-handle/obsidian-inspection';
+const CALENDLY_URL = 'https://calendly.com/garamnakah/30min';
 
 type Msg = { from: 'ai' | 'user'; text: string };
 
 const WELCOME: Msg = {
   from: 'ai',
   text: 'Welcome to The Obsidian Residences, Chief. Ask me about floor plans, payment schedules, or click below to lock in your site inspection date.',
+};
+
+// Hardcoded quick-reply responses — no edge function dependency
+const QUICK_REPLIES: Record<string, string> = {
+  'What are the payment schedules?':
+    "You can secure your terrace with a 20% initial deposit, followed by a flexible installment schedule tailored to your timeline over the construction period (Q4 2027 delivery). No rigid monthly structure — we structure it around you. Shall I send the full payment breakdown?",
+  'Show me floor plans':
+    "We offer 12 distinct floor plans across three typologies — Terraces (2-3 bed), Duplexes (3-4 bed), and Waterfront Penthouses (4-5 bed). Sizes range from 180 sqm to 420 sqm with double-height ceilings. The full plan set is linked in the Prospectus button. Shall I send the details, Chief?",
+  'Tell me about pricing':
+    "Terraces start from \u20A685M, Duplexes from \u20A6140M, and Waterfront Penthouses from \u20A6220M. All off-plan prices are locked at today's rate and appreciate on completion. Would you like the full price sheet?",
+  'Book a site inspection':
+    "Of course, Chief. Tap the 'Schedule Inspection' button below the chat to pick a private tour slot directly on our calendar — I'll confirm immediately. Tours run Tuesday to Sunday at the Lekki Phase 1 show residence.",
 };
 
 export default function ChatWidget() {
@@ -32,17 +44,15 @@ export default function ChatWidget() {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
   }, [msgs, typing, open, showLeadForm]);
 
+  const pushAI = (text: string) => {
+    setMsgs((m) => [...m, { from: 'ai' as const, text }]);
+  };
+
   const callAI = async (text: string) => {
     setTyping(true);
     const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
     if (!EDGE_FUNCTION_URL || !anonKey) {
-      setMsgs((m) => [
-        ...m,
-        {
-          from: 'ai',
-          text: "I'm here to help with floor plans, pricing, payment schedules, or booking an inspection. What would you like to know, Chief?",
-        },
-      ]);
+      pushAI("I'm here to help with floor plans, pricing, payment schedules, or booking an inspection. What would you like to know, Chief?");
       setTyping(false);
       return;
     }
@@ -68,25 +78,31 @@ export default function ChatWidget() {
       if (!res.ok) throw new Error(`Request failed (${res.status})`);
       const data = await res.json();
       if (!data || typeof data.reply !== 'string') throw new Error('Bad response');
-      setMsgs((m) => [...m, { from: 'ai', text: data.reply }]);
+      pushAI(data.reply);
     } catch {
-      setMsgs((m) => [
-        ...m,
-        {
-          from: 'ai',
-          text: "I'm here to help with floor plans, pricing, payment schedules, or booking an inspection. What would you like to know, Chief?",
-        },
-      ]);
+      pushAI("I'm here to help with floor plans, pricing, payment schedules, or booking an inspection. What would you like to know, Chief?");
     } finally {
       setTyping(false);
     }
   };
 
   const send = (text: string) => {
-    const t = text.trim();
+    const t = String(text).trim();
     if (!t) return;
-    setMsgs((m) => [...m, { from: 'user', text: t }]);
+    setMsgs((m) => [...m, { from: 'user' as const, text: t }]);
     setInput('');
+
+    // Hardcoded quick-reply paths — checked before edge function
+    const quick = QUICK_REPLIES[t];
+    if (quick) {
+      setTyping(true);
+      setTimeout(() => {
+        pushAI(quick);
+        setTyping(false);
+      }, 600);
+      return;
+    }
+
     void callAI(t);
   };
 
