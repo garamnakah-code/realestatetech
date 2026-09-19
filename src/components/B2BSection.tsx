@@ -90,11 +90,10 @@ export default function B2BSection() {
             Our 100% Risk-Reversal Performance Guarantee
           </h3>
           <p className="mx-auto mt-4 max-w-xl text-sm font-light leading-relaxed text-white sm:text-base">
-            We deploy your company's full digital sales infrastructure in 10 business days flat
-            for a total implementation fee of &#8358;6,600,000 NGN ($4,000 USD). We absorb 100% of
-            the technical risk: If our system is not fully operational within 10 days, we issue a
-            100% immediate refund, and your brand keeps all custom video assets and landing
-            portal designs for completely free.
+            We deploy your company's full digital sales infrastructure in 10 business days flat.
+            We absorb 100% of the technical risk: If our system is not fully operational within
+            10 days, we issue a 100% immediate refund, and your brand keeps all custom video
+            assets and landing portal designs for completely free.
           </p>
         </div>
 
